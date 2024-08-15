@@ -3,8 +3,8 @@ import Header from './Header';
 import FilterBar from './FilterBar';
 import AddEntryForm from './AddEntryForm';
 
-// Use environment variable for backend URL
-const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// Use a constant for the backend URL
+const REPLIT_BACKEND_URL = 'https://training-tracking-dashboard.hosala-lukas.workers.dev';
 
 const Dashboard = () => {
   const [entries, setEntries] = useState([]);
@@ -21,12 +21,20 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetch(`${REACT_APP_BACKEND_URL}/api/entries`)
-      .then((response) => response.json())
+    // Fetch entries from the backend API
+    fetch(`${REPLIT_BACKEND_URL}/api/entries`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch entries');
+        }
+        return response.json();
+      })
       .then((data) => {
-        setEntries(data.entries);
-        setFilteredEntries(data.entries);
-        calculateMetrics(data.entries);
+        if (data && data.entries) {
+          setEntries(data.entries);
+          setFilteredEntries(data.entries);
+          calculateMetrics(data.entries);
+        }
       })
       .catch((error) => console.error('Error fetching entries:', error));
   }, []);
@@ -67,7 +75,7 @@ const Dashboard = () => {
   };
 
   const handleAddEntry = (entry) => {
-    fetch(`${REACT_APP_BACKEND_URL}/api/entries`, {
+    fetch(`${REPLIT_BACKEND_URL}/api/entries`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -238,6 +246,7 @@ const styles = {
 };
 
 export default Dashboard;
+
 
 
 
