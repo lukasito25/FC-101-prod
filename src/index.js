@@ -1,10 +1,18 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
+import renderHtml from './renderHtml';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+export default {
+  async fetch(request, env) {
+    const { DATABASE } = env;
+    const stmt = DATABASE.prepare('SELECT * FROM comments LIMIT 3');
+    const { results } = await stmt.all();
+
+    return new Response(
+      renderHtml(JSON.stringify(results, null, 2)),
+      { 
+        headers: {
+          'content-type': 'text/html'
+        },
+      }
+    )
+  }
+}

@@ -3,7 +3,8 @@ import Header from './Header';
 import FilterBar from './FilterBar';
 import AddEntryForm from './AddEntryForm';
 
-const REPLIT_BACKEND_URL = 'https://workerforfc-101.hosala-lukas.workers.dev';
+// Use environment variable for backend URL
+const REACT_APP_BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 const Dashboard = () => {
   const [entries, setEntries] = useState([]);
@@ -20,7 +21,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetch(`${REPLIT_BACKEND_URL}/api/entries`)
+    fetch(`${REACT_APP_BACKEND_URL}/api/entries`)
       .then((response) => response.json())
       .then((data) => {
         setEntries(data.entries);
@@ -66,7 +67,7 @@ const Dashboard = () => {
   };
 
   const handleAddEntry = (entry) => {
-    fetch(`${REPLIT_BACKEND_URL}/api/entries`, {
+    fetch(`${REACT_APP_BACKEND_URL}/api/entries`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -124,7 +125,12 @@ const Dashboard = () => {
             <tbody>
               {filteredEntries.map((entry) => (
                 <tr key={entry.id}>
-                  <td style={styles.td}>{entry.date}</td><td style={styles.td}>{entry.microcycle}</td><td style={styles.td}>{entry.sessionType}</td><td style={styles.td}>{entry.volume}</td><td style={styles.td}>{entry.intensity}</td><td style={styles.td}>{entry.objective1}</td>
+                  <td style={styles.td}>{entry.date}</td>
+                  <td style={styles.td}>{entry.microcycle}</td>
+                  <td style={styles.td}>{entry.sessionType}</td>
+                  <td style={styles.td}>{entry.volume}</td>
+                  <td style={styles.td}>{entry.intensity}</td>
+                  <td style={styles.td}>{entry.objective1}</td>
                 </tr>
               ))}
             </tbody>
@@ -232,6 +238,7 @@ const styles = {
 };
 
 export default Dashboard;
+
 
 
 

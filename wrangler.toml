@@ -1,0 +1,8 @@
+name = "training-tracking-dashboard"
+main = "src/index.js"
+compatibility_date = "2023-08-23"
+
+[[d1_databases]]
+name = "training-tracking-dashboard-db"
+binding = "DATABASE"
+database_id = "a928ffd2-58bb-47c9-a8de-c68c45d82c76"
