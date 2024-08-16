@@ -3,7 +3,7 @@ import Header from './Header';
 import FilterBar from './FilterBar';
 import AddEntryForm from './AddEntryForm';
 
-const REPLIT_BACKEND_URL = 'https://71361e57-5621-4ce9-a477-742aef29fe22-00-23dssehx19ldy.kirk.replit.dev';
+const REPLIT_BACKEND_URL = 'https://training-tracking-dashboard.hosala-lukas.workers.dev';
 
 const Dashboard = () => {
   const [entries, setEntries] = useState([]);
