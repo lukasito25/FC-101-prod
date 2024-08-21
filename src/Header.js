@@ -85,6 +85,7 @@ const styles = {
     fontSize: '24px',
     fontWeight: '600',
     color: '#333',
+    textAlign: 'center', // Center title text for better mobile display
   },
   userInfo: {
     display: 'flex',
@@ -125,9 +126,27 @@ const styles = {
     cursor: 'pointer',
     width: '100%',
   },
+  '@media (max-width: 768px)': {
+    header: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      padding: '10px 20px',
+    },
+    languageToggle: {
+      marginBottom: '10px',
+    },
+    title: {
+      fontSize: '20px',
+      marginBottom: '10px',
+    },
+    userInfo: {
+      alignSelf: 'flex-end', // Align user info to the right on mobile
+    },
+  },
 };
 
 export default Header;
+
 
 
 
