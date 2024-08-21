@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Check if the user is already authenticated
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (isAuthenticated) {
+      onLogin();
+    }
+  }, [onLogin]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -13,6 +21,7 @@ const Login = ({ onLogin }) => {
 
     setTimeout(() => {
       if (username === 'LUHO' && password === 'passwordLESS') {
+        localStorage.setItem('isAuthenticated', 'true'); // Save auth status to localStorage
         onLogin();
       } else {
         setError('Invalid username or password');
@@ -236,6 +245,7 @@ const styles = {
 };
 
 export default Login;
+
 
 
 

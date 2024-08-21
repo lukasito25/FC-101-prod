@@ -3,6 +3,13 @@ import Step1 from './Step1.js';
 import Step2 from './Step2.js';
 import Step3 from './Step3.js';
 
+// Function to replace undefined values with null
+function replaceUndefinedWithNull(obj) {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => [key, value === undefined ? null : value])
+  );
+}
+
 const AddEntryForm = ({ onAddEntry, language }) => {
   const [step, setStep] = useState(1);
 
@@ -27,7 +34,7 @@ const AddEntryForm = ({ onAddEntry, language }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const entry = {
+    let entry = {
       date,
       sessionType,
       microcycle,
@@ -38,6 +45,10 @@ const AddEntryForm = ({ onAddEntry, language }) => {
       intensity,
       complexity,
     };
+
+    // Replace undefined values with null
+    entry = replaceUndefinedWithNull(entry);
+
     onAddEntry(entry);
 
     // Reset form after submission
@@ -156,6 +167,8 @@ const styles = {
 };
 
 export default AddEntryForm;
+
+
 
 
 

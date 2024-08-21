@@ -17,13 +17,19 @@ const Dashboard = ({ onLogout }) => {
   const [expandedSessionId, setExpandedSessionId] = useState(null);
   const [language, setLanguage] = useState('EN'); // State for language selection
 
-  const calculateMetrics = (data) => {
-    const sessions = data.length;
-    const minutes = data.reduce((total, entry) => total + (entry.volume || 0), 0);
-    setMetrics({ sessions, minutes });
-  };
-
   useEffect(() => {
+    const checkAuthStatus = () => {
+      const isAuthenticated = localStorage.getItem('isAuthenticated');
+      if (isAuthenticated !== 'true') {
+        onLogout(); // Trigger logout if authentication is missing
+      }
+    };
+
+    checkAuthStatus();
+    fetchEntries();
+  }, []);
+
+  const fetchEntries = () => {
     fetch(`${REPLIT_BACKEND_URL}/api/entries`)
       .then((response) => response.json())
       .then((data) => {
@@ -32,7 +38,13 @@ const Dashboard = ({ onLogout }) => {
         calculateMetrics(data.entries);
       })
       .catch((error) => console.error('Error fetching entries:', error));
-  }, []);
+  };
+
+  const calculateMetrics = (data) => {
+    const sessions = data.length;
+    const minutes = data.reduce((total, entry) => total + (entry.volume || 0), 0);
+    setMetrics({ sessions, minutes });
+  };
 
   const handleFilterChange = (filters) => {
     let filtered = entries;
