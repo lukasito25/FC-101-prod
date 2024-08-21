@@ -1,10 +1,11 @@
 {
   "files": {
-    "main.js": "/static/js/main.f440dc29.js",
+    "main.js": "/static/js/main.ebdcbc86.js",
+    "static/media/sk_flag.png": "/static/media/sk_flag.061e630ecde1dc426bb7.png",
     "index.html": "/index.html",
-    "main.f440dc29.js.map": "/static/js/main.f440dc29.js.map"
+    "main.ebdcbc86.js.map": "/static/js/main.ebdcbc86.js.map"
   },
   "entrypoints": [
-    "static/js/main.f440dc29.js"
+    "static/js/main.ebdcbc86.js"
   ]
 }

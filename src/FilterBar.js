@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
 
-const FilterBar = ({ onFilterChange, onExport }) => {
+const FilterBar = ({ onFilterChange, entries, language }) => {
   const [sessionType, setSessionType] = useState('');
   const [microcycle, setMicrocycle] = useState('');
   const [objective, setObjective] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [availableMicrocycles, setAvailableMicrocycles] = useState([]);
+
+  useEffect(() => {
+    // Dynamically generate microcycle options based on the entries
+    const microcycles = Array.from(new Set(entries.map(entry => entry.microcycle))).sort((a, b) => a - b);
+    setAvailableMicrocycles(microcycles);
+  }, [entries]);
 
   const handleFilterChange = () => {
     onFilterChange({
@@ -17,10 +26,75 @@ const FilterBar = ({ onFilterChange, onExport }) => {
     });
   };
 
+  const handleExport = () => {
+    if (!microcycle) {
+      alert(language === 'EN' ? 'Please select a microcycle to export.' : 'Vyberte mikrocyklus na export.');
+      return;
+    }
+
+    if (!entries || entries.length === 0) {
+      alert(language === 'EN' ? 'No entries available to export.' : 'Žiadne položky na export.');
+      return;
+    }
+
+    const microcycleEntries = entries.filter(entry => entry.microcycle === parseInt(microcycle, 10));
+
+    const totalVolume = microcycleEntries.reduce((sum, entry) => sum + (entry.volume || 0), 0);
+    const totalIntensity = microcycleEntries.reduce((sum, entry) => sum + (entry.intensity || 0), 0);
+    const totalComplexity = microcycleEntries.reduce((sum, entry) => sum + (entry.complexity || 0), 0);
+
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              text: language === 'EN' ? `Training Microcycle ${microcycle}` : `Tréningový mikrocyklus ${microcycle}`,
+              heading: 'Title',
+            }),
+            ...microcycleEntries.map(entry => new Paragraph({
+              children: [
+                new TextRun({ text: `${language === 'EN' ? 'Date' : 'Dátum'}: ${entry.date}`, bold: true }),
+                new TextRun(`\n${language === 'EN' ? 'Session Type' : 'Typ tréningu'}: ${entry.sessionType}`),
+                new TextRun(`\n${language === 'EN' ? 'Volume' : 'Objem'}: ${entry.volume}`),
+                new TextRun(`\n${language === 'EN' ? 'Intensity' : 'Intenzita'}: ${entry.intensity}`),
+                new TextRun(`\n${language === 'EN' ? 'Complexity' : 'Zložitosť'}: ${entry.complexity}`),
+                new TextRun(`\n${language === 'EN' ? 'Objective 1' : 'Cieľ 1'}: ${entry.objective1}`),
+                new TextRun(`\n${language === 'EN' ? 'Objective 2' : 'Cieľ 2'}: ${entry.objective2 || 'N/A'}`),
+                new TextRun(`\n${language === 'EN' ? 'Exercises' : 'Cvičenia'}:`),
+                ...entry.exercises.map(exercise => new Paragraph({
+                  children: [
+                    new TextRun(`\n  - ${language === 'EN' ? 'Goal' : 'Cieľ'}: ${exercise.goal}`),
+                    new TextRun(`\n  - ${language === 'EN' ? 'Type' : 'Typ'}: ${exercise.exerciseType}`),
+                    new TextRun(`\n  - ${language === 'EN' ? 'Focus' : 'Zameranie'}: ${exercise.focus}`),
+                    new TextRun(`\n  - ${language === 'EN' ? 'Description' : 'Popis'}: ${exercise.description}`),
+                    new TextRun(`\n  - ${language === 'EN' ? 'Duration' : 'Trvanie'}: ${exercise.duration} minutes`),
+                    new TextRun(`\n  - ${language === 'EN' ? 'Fitness Indicator' : 'Kondičný Indikátor'}: ${exercise.fitnessIndicator}`),
+                  ],
+                })),
+              ],
+            })),
+            new Paragraph({
+              text: language === 'EN' ? `Summary for Microcycle ${microcycle}` : `Zhrnutie pre mikrocyklus ${microcycle}`,
+              heading: 'Heading1',
+              spacing: { after: 400 },
+            }),
+            new Paragraph(`${language === 'EN' ? 'Total Volume' : 'Celkový objem'}: ${totalVolume} minutes`),
+            new Paragraph(`${language === 'EN' ? 'Total Intensity' : 'Celková intenzita'}: ${totalIntensity}%`),
+            new Paragraph(`${language === 'EN' ? 'Total Complexity' : 'Celková zložitosť'}: ${totalComplexity}`),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, `Training_Microcycle_${microcycle}.docx`);
+    });
+  };
+
   return (
     <div style={styles.filterBar}>
       <div style={styles.filterItem}>
-        <label style={styles.label}>Session Type:</label>
+        <label style={styles.label}>{language === 'EN' ? 'Session Type' : 'Typ tréningu'}:</label>
         <select
           value={sessionType}
           onChange={(e) => {
@@ -29,16 +103,16 @@ const FilterBar = ({ onFilterChange, onExport }) => {
           }}
           style={styles.select}
         >
-          <option value="">All Types</option>
-          <option value="Training">Training</option>
-          <option value="Match">Match</option>
-          <option value="Recovery">Recovery</option>
-          <option value="Other">Other</option>
+          <option value="">{language === 'EN' ? 'All Types' : 'Všetky typy'}</option>
+          <option value="Training">{language === 'EN' ? 'Training' : 'Tréning'}</option>
+          <option value="Match">{language === 'EN' ? 'Match' : 'Zápas'}</option>
+          <option value="Recovery">{language === 'EN' ? 'Recovery' : 'Regenerácia'}</option>
+          <option value="Other">{language === 'EN' ? 'Other' : 'Iné'}</option>
         </select>
       </div>
 
       <div style={styles.filterItem}>
-        <label style={styles.label}>Microcycle:</label>
+        <label style={styles.label}>{language === 'EN' ? 'Microcycle' : 'Mikrocyklus'}:</label>
         <select
           value={microcycle}
           onChange={(e) => {
@@ -47,17 +121,15 @@ const FilterBar = ({ onFilterChange, onExport }) => {
           }}
           style={styles.select}
         >
-          <option value="">All Microcycles</option>
-          <option value="1">Microcycle 1</option>
-          <option value="2">Microcycle 2</option>
-          <option value="3">Microcycle 3</option>
-          <option value="4">Microcycle 4</option>
-          <option value="5">Microcycle 5</option>
+          <option value="">{language === 'EN' ? 'All Microcycles' : 'Všetky mikrocykly'}</option>
+          {availableMicrocycles.map(mc => (
+            <option key={mc} value={mc}>{language === 'EN' ? 'Microcycle' : 'Mikrocyklus'} {mc}</option>
+          ))}
         </select>
       </div>
 
       <div style={styles.filterItem}>
-        <label style={styles.label}>Objective:</label>
+        <label style={styles.label}>{language === 'EN' ? 'Objective' : 'Cieľ'}:</label>
         <input
           type="text"
           value={objective}
@@ -65,13 +137,13 @@ const FilterBar = ({ onFilterChange, onExport }) => {
             setObjective(e.target.value);
             handleFilterChange();
           }}
-          placeholder="Enter objective"
+          placeholder={language === 'EN' ? 'Enter objective' : 'Zadajte cieľ'}
           style={styles.input}
         />
       </div>
 
       <div style={styles.filterItem}>
-        <label style={styles.label}>Start Date:</label>
+        <label style={styles.label}>{language === 'EN' ? 'From Date' : 'Od dátumu'}:</label>
         <input
           type="date"
           value={startDate}
@@ -84,7 +156,7 @@ const FilterBar = ({ onFilterChange, onExport }) => {
       </div>
 
       <div style={styles.filterItem}>
-        <label style={styles.label}>End Date:</label>
+        <label style={styles.label}>{language === 'EN' ? 'To Date' : 'Do dátumu'}:</label>
         <input
           type="date"
           value={endDate}
@@ -96,7 +168,9 @@ const FilterBar = ({ onFilterChange, onExport }) => {
         />
       </div>
 
-      <button onClick={onExport} style={styles.exportButton}>Export</button>
+      <button onClick={handleExport} style={styles.exportButton}>
+        {language === 'EN' ? 'Export' : 'Exportovať'}
+      </button>
     </div>
   );
 };
@@ -175,11 +249,3 @@ const styles = {
 };
 
 export default FilterBar;
-
-
-
-
-
-
-
-

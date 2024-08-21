@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import Header from './Header';
-import FilterBar from './FilterBar';
-import AddEntryForm from './AddEntryForm';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import Header from './Header.js';
+import FilterBar from './FilterBar.js';
+import AddEntryForm from './AddEntryForm.js';
 
 const REPLIT_BACKEND_URL = 'https://training-tracking-dashboard.hosala-lukas.workers.dev';
 
-const Dashboard = () => {
+const Dashboard = ({ onLogout }) => {
   const [entries, setEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [metrics, setMetrics] = useState({
     sessions: 0,
     minutes: 0,
   });
+  const [expandedSessionId, setExpandedSessionId] = useState(null);
+  const [language, setLanguage] = useState('EN'); // State for language selection
 
   const calculateMetrics = (data) => {
     const sessions = data.length;
@@ -60,9 +64,121 @@ const Dashboard = () => {
     calculateMetrics(filtered);
   };
 
-  const handleExport = () => {
-    // Implement export functionality here
-    console.log('Exporting filtered data:', filteredEntries);
+  const handleLanguageChange = (lang) => {
+    setLanguage(lang);
+    // Additional logic to update the language in other parts of the app if necessary
+  };
+
+  const handleExportFiltered = () => {
+    if (filteredEntries.length === 0) {
+      alert('No entries to export.');
+      return;
+    }
+
+    const doc = new Document({
+      sections: [
+        {
+          children: filteredEntries.map(entry => new Paragraph({
+            children: [
+              new TextRun({ text: `Date: ${entry.date}`, bold: true }),
+              new TextRun(`\nMicrocycle: ${entry.microcycle}`),
+              new TextRun(`\nSession Type: ${entry.sessionType}`),
+              new TextRun(`\nVolume: ${entry.volume}`),
+              new TextRun(`\nIntensity: ${entry.intensity}`),
+              new TextRun(`\nObjective 1: ${entry.objective1}`),
+              new TextRun(`\nObjective 2: ${entry.objective2 || 'N/A'}`),
+              new TextRun(`\nExercises:`),
+              ...entry.exercises.map(exercise => new Paragraph({
+                children: [
+                  new TextRun(`\n  - Goal: ${exercise.goal}`),
+                  new TextRun(`\n  - Type: ${exercise.exerciseType}`),
+                  new TextRun(`\n  - Focus: ${exercise.focus}`),
+                  new TextRun(`\n  - Description: ${exercise.description}`),
+                  new TextRun(`\n  - Duration: ${exercise.duration} minutes`),
+                  new TextRun(`\n  - Fitness Indicator: ${exercise.fitnessIndicator}`),
+                ],
+              })),
+            ],
+          })),
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, 'Filtered_Training_Sessions.docx');
+    });
+  };
+
+  const handleExportEntry = (entry) => {
+    const doc = new Document({
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              text: `Training Session on ${entry.date}`,
+              heading: 'Title',
+            }),
+            new Paragraph({
+              text: `Microcycle: ${entry.microcycle}`,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `Session Type: ${entry.sessionType}`,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `Volume: ${entry.volume}`,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `Intensity: ${entry.intensity}`,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `Objective 1: ${entry.objective1}`,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              text: `Objective 2: ${entry.objective2 || 'N/A'}`,
+              spacing: { after: 400 },
+            }),
+            new Paragraph({
+              text: 'Exercises',
+              heading: 'Heading1',
+              spacing: { after: 400 },
+            }),
+            new Table({
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({ children: [new Paragraph('Goal')] }),
+                    new TableCell({ children: [new Paragraph('Type')] }),
+                    new TableCell({ children: [new Paragraph('Focus')] }),
+                    new TableCell({ children: [new Paragraph('Description')] }),
+                    new TableCell({ children: [new Paragraph('Duration')] }),
+                    new TableCell({ children: [new Paragraph('Fitness Indicator')] }),
+                  ],
+                }),
+                ...entry.exercises.map(exercise => new TableRow({
+                  children: [
+                    new TableCell({ children: [new Paragraph(exercise.goal)] }),
+                    new TableCell({ children: [new Paragraph(exercise.exerciseType)] }),
+                    new TableCell({ children: [new Paragraph(exercise.focus)] }),
+                    new TableCell({ children: [new Paragraph(exercise.description)] }),
+                    new TableCell({ children: [new Paragraph(`${exercise.duration} minutes`)] }),
+                    new TableCell({ children: [new Paragraph(exercise.fitnessIndicator)] }),
+                  ],
+                })),
+              ],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then(blob => {
+      saveAs(blob, `Training_Session_${entry.date}.docx`);
+    });
   };
 
   const handleAddEntry = (entry) => {
@@ -71,7 +187,7 @@ const Dashboard = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(entry),  // Ensure entry is correctly formatted
+      body: JSON.stringify(entry),
     })
     .then((response) => {
       if (!response.ok) {
@@ -88,44 +204,102 @@ const Dashboard = () => {
     .catch((error) => console.error('Error adding entry:', error));
   };
 
+  const toggleExpandSession = (id) => {
+    setExpandedSessionId(expandedSessionId === id ? null : id);
+  };
+
   return (
     <div style={styles.container}>
-      <Header />
-      <FilterBar onFilterChange={handleFilterChange} onExport={handleExport} />
+      <Header onLanguageChange={handleLanguageChange} language={language} onLogout={onLogout} />
+      <FilterBar 
+        onFilterChange={handleFilterChange}
+        onExport={handleExportFiltered}
+        entries={entries} 
+        language={language} // Pass the language state to FilterBar
+      />
 
-      {/* Top Metrics Section */}
       <div style={styles.metricsContainer}>
         <div style={styles.metricBox}>
           <span style={styles.metricNumber}>{metrics.sessions}</span>
-          <span style={styles.metricLabel}>Sessions</span>
+          <span style={styles.metricLabel}>{language === 'EN' ? 'Sessions' : 'Tréningy'}</span>
         </div>
         <div style={styles.metricBox}>
           <span style={styles.metricNumber}>{metrics.minutes}</span>
-          <span style={styles.metricLabel}>Minutes</span>
+          <span style={styles.metricLabel}>{language === 'EN' ? 'Minutes' : 'Minúty'}</span>
         </div>
       </div>
 
       <div style={styles.content}>
-        <h2 style={styles.heading}>Add a New Training Session</h2>
-        <AddEntryForm onAddEntry={handleAddEntry} />
-        <h2 style={styles.heading}>Training Sessions</h2>
+        <h2 style={styles.heading}>{language === 'EN' ? 'Add a New Training Session' : 'Pridať nový tréning'}</h2>
+        <AddEntryForm onAddEntry={handleAddEntry} language={language} />
+        <h2 style={styles.heading}>{language === 'EN' ? 'Training Sessions' : 'Tréningy'}</h2>
         <div style={styles.tableContainer}>
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.th}>Date</th>
-                <th style={styles.th}>Microcycle</th>
-                <th style={styles.th}>Session Type</th>
-                <th style={styles.th}>Volume</th>
-                <th style={styles.th}>Intensity</th>
-                <th style={styles.th}>Goal</th>
+                <th style={styles.th}>{language === 'EN' ? 'Date' : 'Dátum'}</th>
+                <th style={styles.th}>{language === 'EN' ? 'Microcycle' : 'Mikrocyklus'}</th>
+                <th style={styles.th}>{language === 'EN' ? 'Session Type' : 'Typ tréningu'}</th>
+                <th style={styles.th}>{language === 'EN' ? 'Volume' : 'Objem'}</th>
+                <th style={styles.th}>{language === 'EN' ? 'Intensity' : 'Intenzita'}</th>
+                <th style={styles.th}>{language === 'EN' ? 'Goal' : 'Cieľ'}</th>
               </tr>
             </thead>
             <tbody>
               {filteredEntries.map((entry) => (
-                <tr key={entry.id}>
-                  <td style={styles.td}>{entry.date}</td><td style={styles.td}>{entry.microcycle}</td><td style={styles.td}>{entry.sessionType}</td><td style={styles.td}>{entry.volume}</td><td style={styles.td}>{entry.intensity}</td><td style={styles.td}>{entry.objective1}</td>
-                </tr>
+                <React.Fragment key={entry.id}>
+                  <tr style={styles.row} onClick={() => toggleExpandSession(entry.id)}>
+                    <td style={styles.td}>{entry.date}</td>
+                    <td style={styles.td}>{entry.microcycle}</td>
+                    <td style={styles.td}>{entry.sessionType}</td>
+                    <td style={styles.td}>{entry.volume}</td>
+                    <td style={styles.td}>{entry.intensity}</td>
+                    <td style={styles.td}>{entry.objective1}</td>
+                  </tr>
+                  {expandedSessionId === entry.id && (
+                    <tr>
+                      <td style={styles.expandedRow} colSpan="6">
+                        <div style={styles.expandedContent}>
+                          <div style={styles.exportIconContainer}>
+                            <FontAwesomeIcon
+                              icon={faDownload}
+                              style={styles.exportIcon}
+                              onClick={() => handleExportEntry(entry)}
+                              title={language === 'EN' ? "Export to Word" : "Exportovať do Wordu"}
+                            />
+                          </div>
+                          <h3>{language === 'EN' ? 'Additional Details' : 'Ďalšie Podrobnosti'}</h3>
+                          <p><strong>{language === 'EN' ? 'Objective 2:' : 'Cieľ 2:'}</strong> {entry.objective2}</p>
+                          <h4>{language === 'EN' ? 'Exercises:' : 'Cvičenia:'}</h4>
+                          <table style={styles.exerciseTable}>
+                            <thead>
+                              <tr>
+                                <th style={styles.exerciseTableHeader}>{language === 'EN' ? 'Goal' : 'Cieľ'}</th>
+                                <th style={styles.exerciseTableHeader}>{language === 'EN' ? 'Type' : 'Typ'}</th>
+                                <th style={styles.exerciseTableHeader}>{language === 'EN' ? 'Focus' : 'Zameranie'}</th>
+                                <th style={styles.exerciseTableHeader}>{language === 'EN' ? 'Description' : 'Popis'}</th>
+                                <th style={styles.exerciseTableHeader}>{language === 'EN' ? 'Duration' : 'Trvanie'}</th>
+                                <th style={styles.exerciseTableHeader}>{language === 'EN' ? 'Fitness Indicator' : 'Kondičný Indikátor'}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {entry.exercises.map(exercise => (
+                                <tr key={exercise.id}>
+                                  <td style={styles.exerciseTableCell}>{exercise.goal}</td>
+                                  <td style={styles.exerciseTableCell}>{exercise.exerciseType}</td>
+                                  <td style={styles.exerciseTableCell}>{exercise.focus}</td>
+                                  <td style={styles.exerciseTableCell}>{exercise.description}</td>
+                                  <td style={styles.exerciseTableCell}>{exercise.duration}</td>
+                                  <td style={styles.exerciseTableCell}>{exercise.fitnessIndicator}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -209,6 +383,46 @@ const styles = {
     padding: '12px 15px',
     borderBottom: '1px solid #e6e6e6',
     color: '#555',
+  },
+  row: {
+    cursor: 'pointer',
+  },
+  expandedRow: {
+    backgroundColor: '#f9f9f9',
+    padding: '20px',
+  },
+  expandedContent: {
+    padding: '10px',
+    backgroundColor: '#f0f0f0',
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    position: 'relative',
+  },
+  exportIconContainer: {
+    position: 'absolute',
+    right: '10px',
+    top: '10px',
+  },
+  exportIcon: {
+    fontSize: '24px',
+    color: '#4CAF50',
+    cursor: 'pointer',
+  },
+  exerciseTable: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '10px',
+  },
+  exerciseTableHeader: {
+    padding: '8px 10px',
+    backgroundColor: '#e1e1e1',
+    borderBottom: '1px solid #ddd',
+    textAlign: 'left',
+  },
+  exerciseTableCell: {
+    padding: '8px 10px',
+    borderBottom: '1px solid #ddd',
+    textAlign: 'left',
   },
   '@media (max-width: 768px)': {
     metricsContainer: {
