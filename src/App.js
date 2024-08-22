@@ -6,21 +6,20 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check localStorage to see if the user is already logged in
-    const storedAuthState = localStorage.getItem('isAuthenticated');
-    if (storedAuthState === 'true') {
+    // Check if the user is already authenticated
+    const authStatus = localStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
       setIsAuthenticated(true);
     }
   }, []);
 
   const handleLogin = () => {
     setIsAuthenticated(true);
-    localStorage.setItem('isAuthenticated', 'true'); // Save login state
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated'); // Clear login state
+    localStorage.removeItem('isAuthenticated'); // Clear authentication state
   };
 
   return (
@@ -35,5 +34,6 @@ function App() {
 }
 
 export default App;
+
 
 
