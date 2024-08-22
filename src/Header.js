@@ -38,7 +38,7 @@ const Header = ({ onLanguageChange, onLogout }) => {
           onClick={() => handleLanguageToggle('SK')}
         />
       </div>
-      <h1 style={styles.title}>
+      <h1 style={styles.title} className="dashboard-title">
         {language === 'EN' ? 'Training Dashboard' : 'Tréningový Dashboard'}
       </h1>
       <div style={styles.userInfo} onClick={toggleDropdown}>
@@ -61,7 +61,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '20px 40px',
+    padding: '10px 20px',
     backgroundColor: '#fff',
     borderRadius: '8px',
     boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
@@ -75,17 +75,20 @@ const styles = {
     alignItems: 'center',
   },
   flag: {
-    width: '30px',
-    height: '20px',
+    width: '24px',
+    height: '16px',
     cursor: 'pointer',
-    marginRight: '10px',
+    marginRight: '5px',
     transition: 'opacity 0.3s',
   },
   title: {
-    fontSize: '24px',
+    fontSize: '20px',
     fontWeight: '600',
     color: '#333',
-    textAlign: 'center', // Center title text for better mobile display
+    textAlign: 'center',
+    flexGrow: 1,
+    marginLeft: '10px',
+    marginRight: '10px',
   },
   userInfo: {
     display: 'flex',
@@ -94,21 +97,21 @@ const styles = {
     position: 'relative', // To position the dropdown
   },
   avatar: {
-    width: '40px',
-    height: '40px',
+    width: '32px',
+    height: '32px',
     borderRadius: '50%',
     objectFit: 'cover',
-    marginRight: '10px',
+    marginRight: '5px',
     border: '1px solid #ddd',
   },
   userName: {
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: 'bold',
     color: '#333',
   },
   dropdown: {
     position: 'absolute',
-    top: '60px', // Position below the user info
+    top: '50px', // Position below the user info
     right: '0px',
     backgroundColor: '#fff',
     borderRadius: '8px',
@@ -130,21 +133,29 @@ const styles = {
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      padding: '10px 20px',
-    },
-    languageToggle: {
-      marginBottom: '10px',
+      padding: '10px',
     },
     title: {
       display: 'none', // Hide the title on mobile devices
     },
     userInfo: {
-      alignSelf: 'flex-end', // Align user info to the right on mobile
+      alignSelf: 'center',
+    },
+    flag: {
+      width: '20px',
+      height: '14px',
+      marginRight: '4px',
+    },
+    avatar: {
+      width: '28px',
+      height: '28px',
+      marginRight: '5px',
     },
   },
 };
 
 export default Header;
+
 
 
 
