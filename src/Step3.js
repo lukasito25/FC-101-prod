@@ -2,7 +2,7 @@ import React from 'react';
 
 const Step3 = ({ volume, intensity, complexity, setVolume, setIntensity, setComplexity, handlePrev, handleSubmit, exerciseData, language }) => {
   return (
-    <div>
+    <form onSubmit={handleSubmit}>
       <div style={styles.formGroup}>
         <label style={styles.label}>{language === 'EN' ? 'Volume (Minutes):' : 'Objem (minúty):'}</label>
         <input
@@ -67,7 +67,7 @@ const Step3 = ({ volume, intensity, complexity, setVolume, setIntensity, setComp
           {language === 'EN' ? 'Submit' : 'Odoslať'}
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 
@@ -162,3 +162,4 @@ const styles = {
 };
 
 export default Step3;
+
