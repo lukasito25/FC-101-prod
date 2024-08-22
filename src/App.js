@@ -11,7 +11,7 @@ function App() {
     if (storedAuthState === 'true') {
       setIsAuthenticated(true);
     }
-  }, []);
+  }, []); // The empty dependency array ensures this effect only runs on mount
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -35,5 +35,6 @@ function App() {
 }
 
 export default App;
+
 
 
