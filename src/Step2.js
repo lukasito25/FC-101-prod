@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
+import { v4 as uuidv4 } from 'uuid'; // Import the UUID generation library
 
 const Step2 = ({ exerciseData = [], setExerciseData, handleNext, handlePrev, language }) => {
   const [exerciseGoal, setExerciseGoal] = useState('');
@@ -11,7 +12,7 @@ const Step2 = ({ exerciseData = [], setExerciseData, handleNext, handlePrev, lan
 
   const handleAddExercise = () => {
     const newExercise = {
-      id: exerciseData.length + 1,
+      id: uuidv4(), // Generate a new UUID for the exercise
       goal: exerciseGoal,
       type: exerciseType,
       focus: focus,
@@ -38,6 +39,7 @@ const Step2 = ({ exerciseData = [], setExerciseData, handleNext, handlePrev, lan
 
   return (
     <div>
+      {/* Form for adding exercises */}
       <div style={styles.formGroup}>
         <label style={styles.label}>{language === 'EN' ? 'Exercise Goal' : 'Cieľ cvičenia'}:</label>
         <select value={exerciseGoal} onChange={(e) => setExerciseGoal(e.target.value)} style={styles.select}>
@@ -111,6 +113,7 @@ const Step2 = ({ exerciseData = [], setExerciseData, handleNext, handlePrev, lan
         </button>
       </div>
 
+      {/* List of added exercises */}
       <h3 style={styles.addedExercisesTitle}>{language === 'EN' ? 'Added Exercises' : 'Pridané cvičenia'}</h3>
       <div style={styles.exerciseTable}>
         <div style={styles.exerciseTableHeader}>
@@ -269,6 +272,7 @@ const styles = {
 };
 
 export default Step2;
+
 
 
 

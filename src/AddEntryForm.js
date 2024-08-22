@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Step1 from './Step1.js';
 import Step2 from './Step2.js';
 import Step3 from './Step3.js';
+import { v4 as uuidv4 } from 'uuid'; // Import the UUID generation library
 
 // Function to replace undefined values with null
 function replaceUndefinedWithNull(obj) {
@@ -34,13 +35,25 @@ const AddEntryForm = ({ onAddEntry, language }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Generate UUIDs for each exercise and ensure the structure is correct
+    const sanitizedExercises = exerciseData.map(exercise => ({
+      id: uuidv4(), // Generate a new UUID for each exercise
+      goal: exercise.goal || null,
+      exerciseType: exercise.exerciseType || null,
+      focus: exercise.focus || null,
+      description: exercise.description || null,
+      duration: exercise.duration || null,
+      fitnessIndicator: exercise.fitnessIndicator || null,
+    }));
+
     let entry = {
       date,
       sessionType,
       microcycle,
       objective1,
       objective2,
-      exercises: exerciseData, // Include exercises in the final submission
+      exercises: sanitizedExercises, // Use sanitized exercise data with UUIDs
       volume,
       intensity,
       complexity,
@@ -167,6 +180,8 @@ const styles = {
 };
 
 export default AddEntryForm;
+
+
 
 
 
