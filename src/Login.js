@@ -13,6 +13,8 @@ const Login = ({ onLogin }) => {
 
     setTimeout(() => {
       if (username === 'LUHO' && password === 'passwordLESS') {
+        // Store the authentication state in localStorage
+        localStorage.setItem('isAuthenticated', 'true');
         onLogin();
       } else {
         setError('Invalid username or password');
@@ -236,6 +238,7 @@ const styles = {
 };
 
 export default Login;
+
 
 
 
